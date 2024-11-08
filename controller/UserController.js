@@ -14,10 +14,43 @@ const Banner = require('../model/BannerSchema');
 const Event = require('../model/EventSchema');
 const Image = require('../model/ImageAdminSchema');
 const UserImage = require('../model/UserImagesSchema');
+const { default: axios } = require('axios');
 
 const jwtSecret = 'Thr0bZyphrnQ8vkJumpl3BaskEel@ticsXzylN!gmaPneuma';
 
+const sendOtpViaSMS = async (mobile, otp, userName) => {
+    try {
+        console.log(mobile, otp, userName);
+        const response = await axios.post('https://backend.aisensy.com/campaign/t1/api/v2', {
+            "apiKey": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2OGUyMGFmMmM2MjQ5MThjZWY4MWI0NiIsIm5hbWUiOiJpaW5zYWYtbmV3IiwiYXBwTmFtZSI6IkFpU2Vuc3kiLCJjbGllbnRJZCI6IjY2OGI4MjY4NTk4MWY4MTkzNjkwZDE4OCIsImFjdGl2ZVBsYW4iOiJCQVNJQ19NT05USExZIiwiaWF0IjoxNzIxODEzMTA2fQ.ZhQAF2tICnEtxVfiJS_y8dIdbLtIezK4R7Jd1Z1trw4",
+            "campaignName": "copy_otp",
+            "destination": `91${mobile}`,
+            // "userName": "iinsaf-new",
+            "templateParams": [
+                `${otp}`
+            ],
 
+            "buttons": [
+                {
+                    "type": "button",
+                    "sub_type": "url",
+                    "index": 0,
+                    "parameters": [
+                        {
+                            "type": "text",
+                            "text": `${otp}`
+                        }
+                    ]
+                }
+            ],
+        })
+        console.log("WhatsApp OTP sent : ", response.data);
+        return response.data; // Return response if needed for further handling
+    } catch (error) {
+        console.error("Error sending WhatsApp OTP:", error);
+        throw new Error("Failed to send WhatsApp OTP"); // Throw error for error handling in `sendOtp`
+    }
+}
 
 const getCompatibleBloodGroups = (bloodGroup) => {
     switch (bloodGroup) {
@@ -43,7 +76,7 @@ const userControllerApi = async (req, res) => {
     try {
         // Clear each collection by deleting all documents
         await User.deleteMany({});
-        await  Donater.deleteMany({});
+        await Donater.deleteMany({});
         await Prev.deleteMany({});
         await Camp.deleteMany({});
         await Hospital.deleteMany({});
@@ -259,7 +292,8 @@ const addUser = async (req, res) => {
         const lastUser = await User.findOne().sort({ userNumber: -1 });
 
         // Generate the next user number
-        const nextUserNumber = lastUser ? lastUser.userNumber + 1 : 1;
+        const baseUserNumber = lastUser ? lastUser.userNumber + 1 : 1;
+        const uniqueUserNumber = baseUserNumber + 12345;
 
         const newUser = await User.create({
             phoneNumber,
@@ -267,8 +301,9 @@ const addUser = async (req, res) => {
             password,
             bloodGroup,
             email, // Include email when creating the user
-            userNumber: nextUserNumber // Assign the unique user number
+            userNumber: uniqueUserNumber // Assign the unique user number
         });
+
 
         if (ngoName) {
             const ngo = await Ngo.create({
@@ -295,6 +330,8 @@ const addUser = async (req, res) => {
             subject: "OTP Verification",
             text: `Dear sir, The 6-digit OTP for your donation app account is ${OTP}`,
         };
+
+        sendOtpViaSMS(phoneNumber, OTP, name);
 
         newUser.otp = OTP; // Store the OTP directly or hash it for extra security
         await newUser.save(); // Save the new user with OTP
@@ -488,4 +525,4 @@ const userProfileDetails = async (req, res) => {
     }
 }
 
-module.exports = { userControllerApi ,addUser, verifyOtp, forgetPasswordOtp, loginUser, userProfileDetails, verifyToken, getBloodRequests, sendBloodRequests, deleteBloodRequest, getUserRequests, donatersDetail, approveDonation };
+module.exports = { userControllerApi, addUser, verifyOtp, forgetPasswordOtp, loginUser, userProfileDetails, verifyToken, getBloodRequests, sendBloodRequests, deleteBloodRequest, getUserRequests, donatersDetail, approveDonation, sendOtpViaSMS };
