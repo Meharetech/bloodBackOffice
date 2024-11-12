@@ -5,6 +5,10 @@ const mongoose = require('mongoose')
 const emergencySchema = new mongoose.Schema({
     requestorId: String,
     name: String,
+    city:String,
+    hospitalName:{
+        type:String
+    },
     otp: Number,
     otpExpiry: Date,
     status: {
