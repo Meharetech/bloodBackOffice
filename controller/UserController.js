@@ -15,12 +15,13 @@ const Event = require('../model/EventSchema');
 const Image = require('../model/ImageAdminSchema');
 const UserImage = require('../model/UserImagesSchema');
 const { default: axios } = require('axios');
+const Emeregency = require('../model/EmeregencyRequestSchema');
 
 const jwtSecret = 'Thr0bZyphrnQ8vkJumpl3BaskEel@ticsXzylN!gmaPneuma';
 
 const sendOtpViaSMS = async (mobile, otp, userName) => {
     try {
-        console.log(mobile, otp, userName);
+        console.log("user in otv via sms => ", mobile, otp, userName);
         const response = await axios.post('https://backend.aisensy.com/campaign/t1/api/v2', {
             "apiKey": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2OGUyMGFmMmM2MjQ5MThjZWY4MWI0NiIsIm5hbWUiOiJpaW5zYWYtbmV3IiwiYXBwTmFtZSI6IkFpU2Vuc3kiLCJjbGllbnRJZCI6IjY2OGI4MjY4NTk4MWY4MTkzNjkwZDE4OCIsImFjdGl2ZVBsYW4iOiJCQVNJQ19NT05USExZIiwiaWF0IjoxNzIxODEzMTA2fQ.ZhQAF2tICnEtxVfiJS_y8dIdbLtIezK4R7Jd1Z1trw4",
             "campaignName": "copy_otp",
@@ -134,11 +135,12 @@ const getBloodRequests = async (req, res) => {
         }
 
         const donaters = await Donater.find(query).limit(100);
-        const hospitalRequests = await HospitalDonation.find(query2).limit(20)
+        const emergencyRequest = await Emeregency.find(query).limit(100)
+        const hospitalRequests = await HospitalDonation.find(query2).limit(200)
         const camps = await Camp.find(query2);
         console.log("number of entries sent =>\n", camps.length);
         donaters.reverse();
-        res.status(200).json({ donaters, camps, hospitalRequests });
+        res.status(200).json({ donaters, camps, hospitalRequests, emergencyRequest });
 
     } catch (error) {
         console.error('Failed to add user:', error);
@@ -178,6 +180,116 @@ const sendBloodRequests = async (req, res) => {
         console.log(error)
     }
 }
+
+const sendEmergencyBloodRequests = async (req, res) => {
+    try {
+        const { location, bloodGroup, name, phoneNumber } = req.body;
+        const { Id } = req;
+
+        if (!bloodGroup || !name || !phoneNumber || !location) {
+            return res.status(400).json({ message: "Blood group, name, phone number, and location are required." });
+        }
+
+        // Generate and send OTP
+        const otp = Math.floor(100000 + Math.random() * 900000);
+        sendOtpViaSMS(phoneNumber, otp, name); // Function to send OTP to user via SMS
+
+        // Set OTP expiry time (10 minutes from now)
+        const otpExpiry = new Date(Date.now() + 10 * 60 * 1000);
+
+        // Check for existing pending request with the same phone number
+        let existingRequest = await Emeregency.findOne({ phoneNumber, status: 'pending' });
+
+        if (existingRequest) {
+            // Update existing pending request with new details
+            existingRequest.location = location;
+            existingRequest.bloodGroup = bloodGroup;
+            existingRequest.name = name;
+            existingRequest.otp = otp;
+            existingRequest.otpExpiry = otpExpiry;
+            await existingRequest.save();
+
+            res.status(200).json({ message: "Request Sent successfully.", data: existingRequest });
+        } else {
+            // Create a new request if no pending request exists
+            const newUser = await Emeregency.create({
+                requestorId: Id || phoneNumber,
+                location,
+                bloodGroup,
+                phoneNumber,
+                name,
+                otp,
+                otpExpiry,
+                status: 'pending' // Default status for new requests
+            });
+
+            console.log("New emergency request created:", newUser);
+
+            // Save a record in the Prev collection as well
+            const saveReq = await Prev.create({
+                requestorId: Id || phoneNumber,
+                location,
+                bloodGroup,
+                phoneNumber,
+                name,
+            });
+
+            res.status(200).json({ message: "OTP sent to phone number. Please verify.", data: newUser });
+        }
+    } catch (error) {
+        console.error("Failed to add user:", error);
+        res.status(500).json({ error: "Failed to create blood request. Please try again." });
+    }
+};
+
+const verifyEmeregencyOtp = async (req, res) => {
+    try {
+        console.log("first user is here")
+        const { otp, phoneNumber } = req.body;
+
+        if (!otp || !phoneNumber) {
+            return res.status(400).json({ message: "OTP and phone number are required." });
+        }
+
+        // Find the emergency request with matching phone number, OTP, status pending, and valid expiration
+        const emergencyRequest = await Emeregency.findOne({
+            phoneNumber,
+            otp,
+            status: 'pending',
+            otpExpiry: { $gt: new Date() } // Ensure OTP is not expired
+        });
+
+        if (!emergencyRequest) {
+            return res.status(400).json({ message: "Invalid or expired OTP. Please request again if needed." });
+        }
+
+        // Update the status to 'approved' upon successful OTP verification
+        emergencyRequest.status = 'approved';
+        emergencyRequest.otp = null;
+        emergencyRequest.otpExpiry = null;
+
+        await emergencyRequest.save();
+
+        res.status(200).json({ message: "OTP verified successfully, request approved.", data: emergencyRequest });
+    } catch (error) {
+        console.error("Failed to verify OTP:", error);
+        res.status(500).json({ message: "Server error during OTP verification.", error: error.message });
+    }
+};
+
+const checkEmergencyBloodRequest = async (req, res) => {
+    try {
+        const { phoneNumber } = req.query;
+        const requests = await Emeregency.find({ phoneNumber });
+        if (requests.length > 0) {
+            res.status(200).json({ message: 'Emergency blood request found', requests });
+        } else {
+            res.status(404).json({ message: 'No emergency blood request found' });
+        }
+    } catch (error) {
+        res.status(500).json({ message: 'Server error ', error });
+    }
+};
 
 const deleteBloodRequest = async (req, res) => {
     try {
@@ -231,17 +343,18 @@ const getUserRequests = async (req, res) => {
 const donatersDetail = async (req, res) => {
     try {
         const { donaterId } = req.query;
-        const response = await Donater.findById(donaterId);
+        let response = await Donater.findById(donaterId);
         if (!response) {
-            return res.status(404).json({ message: 'Donater not found' });
+            response = await Emeregency.findById(donaterId);
+            if (!response) {
+                return res.status(404).json({ message: 'Donater not found' });
+            }
         }
         res.status(200).json(response);
     } catch (error) {
         res.status(500).json(error);
     }
 };
-
-
 
 const verifyToken = async (req, res, next) => {
     const token = req.headers.authorization;
@@ -517,7 +630,8 @@ const userProfileDetails = async (req, res) => {
         const { Id } = req;
         const user = await User.findById(Id, { token: 0 });
         const previousRequests = await Prev.find({ requestorId: Id });
-        res.status(200).json({ user, message: "these are the previous requests =>", previousRequests });
+        const previousEmergncyRequest = await Emeregency.find({ phoneNumber: user.phoneNumber })
+        res.status(200).json({ user, message: "these are the previous requests =>", previousRequests, previousEmergncyRequest });
 
     } catch (error) {
         res.status(500).json({ message: 'Server error ', error: error.message });
@@ -525,4 +639,6 @@ const userProfileDetails = async (req, res) => {
     }
 }
 
-module.exports = { userControllerApi, addUser, verifyOtp, forgetPasswordOtp, loginUser, userProfileDetails, verifyToken, getBloodRequests, sendBloodRequests, deleteBloodRequest, getUserRequests, donatersDetail, approveDonation, sendOtpViaSMS };
+
+
+module.exports = { userControllerApi, addUser, verifyOtp, forgetPasswordOtp, loginUser, userProfileDetails, verifyToken, getBloodRequests, sendBloodRequests, sendEmergencyBloodRequests, verifyEmeregencyOtp, checkEmergencyBloodRequest, deleteBloodRequest, getUserRequests, donatersDetail, approveDonation, sendOtpViaSMS };
