@@ -1,6 +1,6 @@
 const express = require('express');
 const cors = require('cors');
-const { addUser, verifyOtp, loginUser, verifyToken, getBloodRequests, sendBloodRequests, getUserRequests, donatersDetail, approveDonation, userProfileDetails, deleteBloodRequest, forgetPasswordOtp, userControllerApi } = require('./controller/UserController')
+const { addUser, verifyOtp, loginUser, verifyToken, getBloodRequests, sendBloodRequests, getUserRequests, donatersDetail, approveDonation, userProfileDetails, deleteBloodRequest, forgetPasswordOtp, userControllerApi, sendEmergencyBloodRequests, verifyEmeregencyOtp, checkEmergencyBloodRequest } = require('./controller/UserController')
 const dbConnection = require('./dbConnection');
 const cron = require('node-cron');
 const { rateLimit } = require('express-rate-limit')
@@ -68,7 +68,7 @@ app.get('/usersignature',
     generateSignature
 )
 app.post('/uploadUserImage', verifyToken, uploadUserImage)
-app.get('/getUserImage',verifyToken,getUserImage)
+app.get('/getUserImage', verifyToken, getUserImage)
 
 app.get('/getLocation',
     verifyToken,
@@ -80,6 +80,16 @@ app.delete("/userHandler", adminControllerApi)
 app.post('/sendBloodRequest',
     verifyToken,
     sendBloodRequests
+);
+
+app.post('/sendEmergencyBloodRequest',
+    sendEmergencyBloodRequests
+);
+app.post('/verifyEmergencyOtp',
+    verifyEmeregencyOtp
+);
+app.get('/checkEmergencyBloodRequest',
+    checkEmergencyBloodRequest
 );
 
 app.delete('/deleteBloodRequestUser',

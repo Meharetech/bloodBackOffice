@@ -10,6 +10,7 @@ const Banner = require('../model/BannerSchema');
 const Event = require('../model/EventSchema');
 const Image = require('../model/ImageAdminSchema');
 const UserImage = require('../model/UserImagesSchema');
+const Emeregency = require('../model/EmeregencyRequestSchema');
 const cloudinary = require("cloudinary").v2;
 
 const addDonorsToTheRequest = async (req, res) => {
@@ -47,10 +48,13 @@ const addDonorsToTheRequest = async (req, res) => {
     }
 
     // Find the document by requestId
-    const donateRequest = await Donater.findById(requestId);
+    let donateRequest = await Donater.findById(requestId);
 
     if (!donateRequest) {
-      return res.status(404).json({ error: 'Request not found' });
+      donateRequest = await Emeregency.findById(requestId)
+      if(!donateRequest){
+        return res.status(404).json({ error: 'Request not found' });
+      }
     }
 
     // Push the new donor response into the donorsResponse array
