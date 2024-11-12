@@ -220,6 +220,7 @@ const sendEmergencyBloodRequests = async (req, res) => {
                 bloodGroup,
                 name,
                 hospitalName,
+                city,
                 phoneNumber,
                 name,
                 otp,
