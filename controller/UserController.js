@@ -183,10 +183,10 @@ const sendBloodRequests = async (req, res) => {
 
 const sendEmergencyBloodRequests = async (req, res) => {
     try {
-        const { location, bloodGroup, name, phoneNumber } = req.body;
+        const { location, bloodGroup, name, phoneNumber, city,hospitalName } = req.body;
         const { Id } = req;
 
-        if (!bloodGroup || !name || !phoneNumber || !location) {
+        if (!bloodGroup || !name || !phoneNumber || !location || !hospitalName || !city ) {
             return res.status(400).json({ message: "Blood group, name, phone number, and location are required." });
         }
 
@@ -205,6 +205,8 @@ const sendEmergencyBloodRequests = async (req, res) => {
             existingRequest.location = location;
             existingRequest.bloodGroup = bloodGroup;
             existingRequest.name = name;
+            existingRequest.hospitalName = hospitalName;
+            existingRequest.city = city;
             existingRequest.otp = otp;
             existingRequest.otpExpiry = otpExpiry;
             await existingRequest.save();
@@ -216,6 +218,8 @@ const sendEmergencyBloodRequests = async (req, res) => {
                 requestorId: Id || phoneNumber,
                 location,
                 bloodGroup,
+                name,
+                hospitalName,
                 phoneNumber,
                 name,
                 otp,
