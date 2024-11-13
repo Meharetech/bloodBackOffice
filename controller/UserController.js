@@ -148,7 +148,6 @@ const getBloodRequests = async (req, res) => {
     }
 };
 
-
 const sendBloodRequests = async (req, res) => {
     try {
         const { location, bloodGroup, name } = req.body;
@@ -183,10 +182,10 @@ const sendBloodRequests = async (req, res) => {
 
 const sendEmergencyBloodRequests = async (req, res) => {
     try {
-        const { location, bloodGroup, name, phoneNumber, city,hospitalName } = req.body;
+        const { location, bloodGroup, name, phoneNumber, city, hospitalName } = req.body;
         const { Id } = req;
 
-        if (!bloodGroup || !name || !phoneNumber || !location || !hospitalName || !city ) {
+        if (!bloodGroup || !name || !phoneNumber || !location || !hospitalName || !city) {
             return res.status(400).json({ message: "Blood group, name, phone number, and location are required." });
         }
 
@@ -554,6 +553,36 @@ const verifyOtp = async (req, res) => {
     }
 };
 
+const resendOtp = async (req, res) => {
+    try {
+        const { email } = req.body;
+
+        if (!email) {
+            return res.status(400).json({ error: 'Email is required.' });
+        }
+
+        // Find the user based on the email
+        const user = await User.findOne({ email });
+        if (!user) {
+            return res.status(404).json({ error: 'User not found.' });
+        }
+
+        // Generate a new OTP and save it to the user document
+        const newOtp = Math.floor(100000 + Math.random() * 900000); // Generate a 6-digit OTP
+        user.otp = newOtp;
+        await user.save();
+
+        // Send the OTP to the user's email/phone (you need to implement sendOtp function)
+        await sendOtp(user.email, newOtp); // Assuming `sendOtp` is a function that sends the OTP
+
+        res.status(200).json({ message: 'OTP has been resent successfully.' });
+    } catch (error) {
+        console.error('Failed to resend OTP:', error);
+        res.status(500).json({ error: 'Server error' });
+    }
+};
+
+
 const loginUser = async (req, res) => {
     try {
         const { phoneNumber, password, location } = req.body;
@@ -646,4 +675,4 @@ const userProfileDetails = async (req, res) => {
 
 
 
-module.exports = { userControllerApi, addUser, verifyOtp, forgetPasswordOtp, loginUser, userProfileDetails, verifyToken, getBloodRequests, sendBloodRequests, sendEmergencyBloodRequests, verifyEmeregencyOtp, checkEmergencyBloodRequest, deleteBloodRequest, getUserRequests, donatersDetail, approveDonation, sendOtpViaSMS };
+module.exports = { userControllerApi, addUser, verifyOtp, resendOtp, forgetPasswordOtp, loginUser, userProfileDetails, verifyToken, getBloodRequests, sendBloodRequests, sendEmergencyBloodRequests, verifyEmeregencyOtp, checkEmergencyBloodRequest, deleteBloodRequest, getUserRequests, donatersDetail, approveDonation, sendOtpViaSMS };
