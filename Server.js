@@ -151,7 +151,6 @@ app.delete("/adminHandler",
     userControllerApi
 )
 
-
 app.post('/adminLogin',
     loginAdmin
 );
@@ -211,7 +210,6 @@ app.post('/setNewEvent',
     setNewEvent
 )
 
-
 app.post('/createBanner', adminVerifyToken, createBanner)
 app.get('/getAllBanners', getAllBanners)
 app.delete('/deleteBanner', adminVerifyToken, deleteBanner)
@@ -257,7 +255,6 @@ app.delete("/hospitalHandler",
     hospitalControllerApi
 )
 
-
 app.post('/addDonorToTheHospitalRequest',
     verifyToken,
     addDonorsToTheHospitalRequest
@@ -270,8 +267,6 @@ app.delete("/bannerHandler",
 app.delete("/donationHandler",
     donationsControllerApi
 )
-
-
 
 app.post('/approveHospitalDonation',
     HospitalverifyToken,
@@ -291,8 +286,6 @@ app.get('/hospitalProfileDetails',
 app.get('/getNgoMembers', HospitalverifyToken, getNgoMembers)
 
 app.get('/getAllHospitalRequests', getBloodRequestsHospital)
-
-
 
 app.post('/deleteImage',
     adminVerifyToken,
@@ -315,8 +308,6 @@ app.get('/getImages',
 
 app.post('/registerVehicle', registerVehicle);
 app.get('/getVehiclesByPincode', getVehicleByPincode)
-
-
 
 cron.schedule('0 0 */4 * *', () => {
     checkDonationEligibility();
