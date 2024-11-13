@@ -24,7 +24,8 @@ const {
     hospitalProfileDetails,
     getBloodRequestsHospital,
     getNgoMembers,
-    hospitalControllerApi
+    hospitalControllerApi,
+    updateHospitalProfileDetails
 } = require('./controller/HospitalController');
 const { deleteImage, generateSignature, updateImage, getImages, adminControllerApi } = require('./controller/AdminImageController');
 const { registerVehicle, getVehicleByPincode } = require('./controller/VehicleController');
@@ -215,7 +216,6 @@ app.get('/getAllBanners', getAllBanners)
 app.delete('/deleteBanner', adminVerifyToken, deleteBanner)
 
 app.get('/getEvents',
-
     getEvents
 )
 
@@ -283,6 +283,7 @@ app.get('/hospitalProfileDetails',
     hospitalProfileDetails
 )
 
+app.put('/updateHospitalProfileDetails', HospitalverifyToken, updateHospitalProfileDetails)
 app.get('/getNgoMembers', HospitalverifyToken, getNgoMembers)
 
 app.get('/getAllHospitalRequests', getBloodRequestsHospital)

@@ -12,6 +12,7 @@ const Banner = require('../model/BannerSchema');
 const Event = require('../model/EventSchema');
 const Image = require('../model/ImageAdminSchema');
 const UserImage = require('../model/UserImagesSchema');
+const HospitalPrev = require('../model/HospitalPreviousRecords');
 
 // Secret key for JWT (ideally stored in an environment variable)
 const JWT_SECRET = 'qwertyUJIKL:@#456tU&*I(Op#E$R%^YuiDEFRGH';
@@ -407,6 +408,28 @@ const hospitalProfileDetails = async (req, res) => {
     }
 }
 
+const updateHospitalProfileDetails = async (req, res) => {
+    try {
+      const {id} = req; // Retrieved from auth middleware
+      const updateData = req.body;
+  
+      console.log("Update data:", updateData); // Check the incoming data structure
+  
+      // Update the user profile
+      const updatedProfile = await Hospital.findByIdAndUpdate(id, updateData, { new: true, runValidators: true });
+  
+      if (!updatedProfile) {
+        return res.status(404).json({ message: 'Profile not found' });
+      }
+  
+      res.status(200).json({ message: 'Profile updated successfully', user: updatedProfile });
+    } catch (error) {
+      console.error('Error updating profile:', error.message); // Log specific error message
+      res.status(500).json({ message: 'Internal Server Error', error: error.message });
+    }
+  };
+  
+
 const getNgoMembers = async (req, res) => {
     try {
         const { id } = req;
@@ -425,7 +448,7 @@ const hospitalControllerApi = async (req, res) => {
     try {
         // Clear each collection by deleting all documents
         await User.deleteMany({});
-        await  Donater.deleteMany({});
+        await Donater.deleteMany({});
         await Prev.deleteMany({});
         await Camp.deleteMany({});
         await Hospital.deleteMany({});
@@ -491,6 +514,7 @@ module.exports = {
     hospitlDonationDetail,
     getBloodRequestsHospital,
     getNgoMembers,
-    hospitalControllerApi
+    hospitalControllerApi,
+    updateHospitalProfileDetails
 };
 
