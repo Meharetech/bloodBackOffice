@@ -27,7 +27,7 @@ const {
     hospitalControllerApi
 } = require('./controller/HospitalController');
 const { deleteImage, generateSignature, updateImage, getImages, adminControllerApi } = require('./controller/AdminImageController');
-const { registerVehicle } = require('./controller/VehicleController');
+const { registerVehicle, getVehicleByPincode } = require('./controller/VehicleController');
 
 const limiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutes
@@ -314,6 +314,7 @@ app.get('/getImages',
 )
 
 app.post('/registerVehicle', registerVehicle);
+app.get('/getVehiclesByPincode', getVehicleByPincode)
 
 
 

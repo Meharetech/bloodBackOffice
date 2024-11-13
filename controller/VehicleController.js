@@ -71,4 +71,4 @@ const getVehicleByPincode = async (req, res) => {
     }
 };
 
-module.exports = { registerVehicle }
+module.exports = { registerVehicle,getVehicleByPincode }
