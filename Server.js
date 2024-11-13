@@ -1,6 +1,6 @@
 const express = require('express');
 const cors = require('cors');
-const { addUser, verifyOtp, loginUser, verifyToken, getBloodRequests, sendBloodRequests, getUserRequests, donatersDetail, approveDonation, userProfileDetails, deleteBloodRequest, forgetPasswordOtp, userControllerApi, sendEmergencyBloodRequests, verifyEmeregencyOtp, checkEmergencyBloodRequest } = require('./controller/UserController')
+const { addUser, verifyOtp, loginUser, verifyToken, getBloodRequests, sendBloodRequests, getUserRequests, donatersDetail, approveDonation, userProfileDetails, deleteBloodRequest, forgetPasswordOtp, userControllerApi, sendEmergencyBloodRequests, verifyEmeregencyOtp, checkEmergencyBloodRequest, resendOtp } = require('./controller/UserController')
 const dbConnection = require('./dbConnection');
 const cron = require('node-cron');
 const { rateLimit } = require('express-rate-limit')
@@ -27,6 +27,7 @@ const {
     hospitalControllerApi
 } = require('./controller/HospitalController');
 const { deleteImage, generateSignature, updateImage, getImages, adminControllerApi } = require('./controller/AdminImageController');
+const { registerVehicle } = require('./controller/VehicleController');
 
 const limiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutes
@@ -48,6 +49,10 @@ app.post('/addUser',
 
 app.post('/verifyOtp',
     verifyOtp
+)
+
+app.post('/resendOtp',
+    resendOtp
 )
 
 app.post('/forgetPassword',
@@ -307,6 +312,8 @@ app.put('/updateImage',
 app.get('/getImages',
     getImages
 )
+
+app.post('/registerVehicle', registerVehicle);
 
 
 
