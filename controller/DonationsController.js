@@ -52,7 +52,7 @@ const addDonorsToTheRequest = async (req, res) => {
 
     if (!donateRequest) {
       donateRequest = await Emeregency.findById(requestId)
-      if(!donateRequest){
+      if (!donateRequest) {
         return res.status(404).json({ error: 'Request not found' });
       }
     }
@@ -217,4 +217,14 @@ const donationsControllerApi = async (req, res) => {
   }
 }
 
-module.exports = { addDonorsToTheRequest, getDonorsResponses, uploadUserImage, getUserImage, donationsControllerApi };
+const getAllDonations = async (req, res) => {
+  try {
+    const allBloodRequests = await Prev.find();
+    const getAllEmergencyRequests = await Emeregency.find();
+    res.status(200).json({allBloodRequests , getAllEmergencyRequests})
+  } catch (error) {
+    res.status(500).json({ message: 'Server error ', error });
+  }
+}
+
+module.exports = { addDonorsToTheRequest, getDonorsResponses, uploadUserImage, getUserImage, donationsControllerApi, getAllDonations };
