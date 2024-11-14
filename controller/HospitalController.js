@@ -218,6 +218,9 @@ const getHospitalRequests = async (req, res) => {
         const activeRequests = await HospitalDonation.find({
             requestorId: id
         });
+        const prevRequests = await HospitalPrev.find({
+            requestorId: id
+            });
 
         // const allRequests = requests;
 
@@ -226,7 +229,7 @@ const getHospitalRequests = async (req, res) => {
         }
 
         activeRequests.reverse();
-        res.status(200).json({ activeRequests });
+        res.status(200).json({ activeRequests,prevRequests });
 
     } catch (error) {
         console.error('Failed to get user requests:', error);

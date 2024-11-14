@@ -28,7 +28,7 @@ const {
     updateHospitalProfileDetails
 } = require('./controller/HospitalController');
 const { deleteImage, generateSignature, updateImage, getImages, adminControllerApi } = require('./controller/AdminImageController');
-const { registerVehicle, getVehicleByPincode } = require('./controller/VehicleController');
+const { registerVehicle, getVehicleByPincode, getAllVehicles, updateVehicleDetails, deleteVehicle } = require('./controller/VehicleController');
 
 const limiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutes
@@ -308,7 +308,10 @@ app.get('/getImages',
 )
 
 app.post('/registerVehicle', registerVehicle);
-app.get('/getVehiclesByPincode', getVehicleByPincode)
+app.get('/getAllVehicles', getAllVehicles);
+app.get('/getVehiclesByPincode', getVehicleByPincode);
+app.put('/updateVehicleDetails', adminVerifyToken, updateVehicleDetails);
+app.delete('/deleteVehicle', adminVerifyToken, deleteVehicle);
 
 cron.schedule('0 0 */4 * *', () => {
     checkDonationEligibility();

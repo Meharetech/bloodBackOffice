@@ -49,6 +49,16 @@ const registerVehicle = async (req, res) => {
     }
 };
 
+const getAllVehicles = async (req, res) => {
+    try {
+        const vehicles = await VolunteerVehicle.find();
+        return res.status(200).json(vehicles);
+    } catch (error) {
+        console.error('Error fetching vehicles:', error);
+        return res.status(500).json({ error: 'Failed to fetch vehicles' });
+    }
+}
+
 const getVehicleByPincode = async (req, res) => {
     try {
         const { pincode } = req.query;
@@ -71,4 +81,69 @@ const getVehicleByPincode = async (req, res) => {
     }
 };
 
-module.exports = { registerVehicle,getVehicleByPincode }
+// Update Vehicle
+const updateVehicleDetails = async (req, res) => {
+    const { id } = req.query;
+    const {
+        ownerName,
+        vehicleType,
+        licensePlate,
+        pincode,
+        capacity,
+        contactNumber,
+        availability,
+        dateOfAvailability,
+        availableDays,
+        expirationDate
+    } = req.body;
+
+    try {
+        // Find the vehicle by ID
+        const vehicle = await VolunteerVehicle.findById(id);
+
+        if (!vehicle) {
+            return res.status(404).json({ message: 'Vehicle not found' });
+        }
+
+        // Update the vehicle details
+        vehicle.ownerName = ownerName || vehicle.ownerName;
+        vehicle.vehicleType = vehicleType || vehicle.vehicleType;
+        vehicle.licensePlate = licensePlate || vehicle.licensePlate;
+        vehicle.pincode = pincode || vehicle.pincode;
+        vehicle.capacity = capacity || vehicle.capacity;
+        vehicle.contactNumber = contactNumber || vehicle.contactNumber;
+        vehicle.availability = availability !== undefined ? availability : vehicle.availability;
+        vehicle.dateOfAvailability = dateOfAvailability || vehicle.dateOfAvailability;
+        vehicle.availableDays = availableDays || vehicle.availableDays;
+        vehicle.expirationDate = expirationDate || vehicle.expirationDate;
+
+        // Save the updated vehicle
+        const updatedVehicle = await vehicle.save();
+
+        res.json(updatedVehicle);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Server error' });
+    }
+};
+
+// Delete Vehicle
+const deleteVehicle = async (req, res) => {
+    const { vehicleId } = req.query;
+
+    try {
+        // Find and delete the vehicle by ID
+        const vehicle = await VolunteerVehicle.findByIdAndDelete(vehicleId);
+
+        if (!vehicle) {
+            return res.status(404).json({ message: 'Vehicle not found' });
+        }
+
+        res.json({ message: 'Vehicle deleted successfully' });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Server error' });
+    }
+};
+
+module.exports = { registerVehicle, getAllVehicles, getVehicleByPincode,updateVehicleDetails,deleteVehicle }
