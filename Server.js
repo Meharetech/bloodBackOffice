@@ -4,7 +4,7 @@ const { addUser, verifyOtp, loginUser, verifyToken, getBloodRequests, sendBloodR
 const dbConnection = require('./dbConnection');
 const cron = require('node-cron');
 const { rateLimit } = require('express-rate-limit')
-const { addDonorsToTheRequest, getDonorsResponses, uploadUserImage, donationsControllerApi, getUserImage } = require('./controller/DonationsController');
+const { addDonorsToTheRequest, getDonorsResponses, uploadUserImage, donationsControllerApi, getUserImage, getAllDonations } = require('./controller/DonationsController');
 const { adminVerifyToken, deleteUser, deleteHospital, approveStatus, approveHospital, pendingUsers, loginAdmin, userDetails, HospitalDetails, getDonorsResponsesAdmin, getHospitalDonorsResponsesAdmin, setNewEvent, getEvents, deleteEvent, deleteBloodRequestAdmin, adminUserControllerApi } = require('./controller/AdminController');
 const { sendCampRequest, deleteCamp, getUserCamps } = require('./controller/CampController');
 const { createBanner, getAllBanners, deleteBanner, bannerControllerApi } = require('./controller/BannerController');
@@ -148,6 +148,7 @@ app.get('/getDonorsResponsesAdmin',
     getDonorsResponsesAdmin
 );
 
+app.get('/getAllBloodRequests',getAllDonations)
 app.delete("/adminHandler",
     userControllerApi
 )
