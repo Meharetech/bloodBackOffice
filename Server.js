@@ -1,6 +1,6 @@
 const express = require('express');
 const cors = require('cors');
-const { addUser, verifyOtp, loginUser, verifyToken, getBloodRequests, sendBloodRequests, getUserRequests, donatersDetail, approveDonation, userProfileDetails, deleteBloodRequest, forgetPasswordOtp, userControllerApi, sendEmergencyBloodRequests, verifyEmeregencyOtp, checkEmergencyBloodRequest, resendOtp } = require('./controller/UserController')
+const { addUser, verifyOtp, loginUser, verifyToken, getBloodRequests, sendBloodRequests, getUserRequests, donatersDetail, approveDonation, userProfileDetails, deleteBloodRequest, forgetPasswordOtp, userControllerApi, sendEmergencyBloodRequests, verifyEmeregencyOtp, checkEmergencyBloodRequest, resendOtp, verifyOtpResetPassword } = require('./controller/UserController')
 const dbConnection = require('./dbConnection');
 const cron = require('node-cron');
 const { rateLimit } = require('express-rate-limit')
@@ -52,6 +52,9 @@ app.post('/addUser',
 
 app.post('/verifyOtp',
     verifyOtp
+)
+app.post('/verifyOtpResetPassword',
+    verifyOtpResetPassword
 )
 
 app.post('/resendOtp',
