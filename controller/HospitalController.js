@@ -141,11 +141,12 @@ const loginHospital = async (req, res) => {
 
         // Find hospital by contact number
         const hospital = await Hospital.findOne({ 'contact': contact });
-        const members = await Ngo.find({ ngoName: hospital.name })
 
+        
         if (!hospital) {
             return res.status(404).json({ message: 'Hospital not found' });
         }
+        const members = await Ngo.find({ ngoName: hospital.name })
 
         if (hospital.status == 'pending') {
             return res.status(404).json({ error: 'Request Approval Still Pending' });
@@ -223,8 +224,9 @@ const getHospitalRequests = async (req, res) => {
             });
 
         // const allRequests = requests;
+        console.log(activeRequests,prevRequests)
 
-        if (activeRequests.length === 0) {
+        if (activeRequests.length === 0 && prevRequests.length === 0) {
             return res.status(404).json({ message: 'No requests found for this user' });
         }
 

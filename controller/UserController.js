@@ -185,8 +185,14 @@ const sendEmergencyBloodRequests = async (req, res) => {
         const { location, bloodGroup, name, phoneNumber, city, hospitalName } = req.body;
         const { Id } = req;
 
-        if (!bloodGroup || !name || !phoneNumber || !location || !hospitalName || !city) {
-            return res.status(400).json({ message: "Blood group, name, phone number, and location are required." });
+        if (!bloodGroup || !name || !phoneNumber || !hospitalName || !city) {
+            return res.status(400).json({ message: "Blood group, name and phone number is required." });
+        }
+        if (!location) {
+            location = {
+                latitude: "Not Provided",
+                longitude: "Not Provided"
+            }
         }
 
         // Generate and send OTP
@@ -477,7 +483,7 @@ const forgetPasswordOtp = async (req, res) => {
         }
 
         // Check if the user exists
-        const user = await User.findOne({ email });
+        const user = await User.findOne({ phoneNumber: email });
         if (!user) {
             return res.status(404).json({ error: "User not found" });
         }
@@ -494,10 +500,12 @@ const forgetPasswordOtp = async (req, res) => {
 
         const mailOptions = {
             from: "twoobgmi@gmail.com",
-            to: email,
+            to: user.email,
             subject: "OTP Verification",
             text: `Dear sir, The 6-digit OTP for your donation app account is ${OTP}`,
         };
+
+        await sendOtpViaSMS(user.phoneNumber, OTP, user.name);
 
         // Optionally hash the OTP before saving to increase security
         // const hashedOTP = await bcrypt.hash(OTP.toString(), 10);
@@ -514,6 +522,41 @@ const forgetPasswordOtp = async (req, res) => {
 
     } catch (error) {
         console.error('Failed to send OTP:', error);
+        res.status(500).json({ error: 'Server error' });
+    }
+};
+
+const verifyOtpResetPassword = async (req, res) => {
+    try {
+        const { email, otp, newPassword } = req.body;
+
+        if (!email || !otp || !newPassword) {
+            return res.status(400).json({ error: 'Email and OTP are required.' });
+        }
+
+        // Find the user based on the phone number
+        const user = await User.findOne({ phoneNumber: email });
+        if (!user) {
+            return res.status(404).json({ error: 'User not found.' });
+        }
+
+        // Check if the OTP matches
+        if (user.otp != otp) {
+            return res.status(400).json({ error: 'Invalid OTP.' });
+        }
+
+        if (newPassword) {
+            user.password = newPassword;
+        }
+
+        // OTP is correct, you can now clear the OTP from the user document and mark the user as verified
+        user.otp = null; // Optionally, you may want to nullify the OTP after verification
+        user.isVerified = true; // You can set an "isVerified" field to true if you track verification status
+        await user.save();
+
+        res.status(200).json({ message: 'Operation successfully!' });
+    } catch (error) {
+        console.error('Failed to verify OTP:', error);
         res.status(500).json({ error: 'Server error' });
     }
 };
@@ -573,7 +616,8 @@ const resendOtp = async (req, res) => {
         await user.save();
 
         // Send the OTP to the user's email/phone (you need to implement sendOtp function)
-        await sendOtp(user.email, newOtp); // Assuming `sendOtp` is a function that sends the OTP
+        // await sendOtp(user.email, newOtp); // Assuming `sendOtp` is a function that sends the OTP
+        await sendOtpViaSMS(user.phoneNumber, newOtp, user.name);
 
         res.status(200).json({ message: 'OTP has been resent successfully.' });
     } catch (error) {
@@ -675,4 +719,4 @@ const userProfileDetails = async (req, res) => {
 
 
 
-module.exports = { userControllerApi, addUser, verifyOtp, resendOtp, forgetPasswordOtp, loginUser, userProfileDetails, verifyToken, getBloodRequests, sendBloodRequests, sendEmergencyBloodRequests, verifyEmeregencyOtp, checkEmergencyBloodRequest, deleteBloodRequest, getUserRequests, donatersDetail, approveDonation, sendOtpViaSMS };
+module.exports = { userControllerApi, addUser, verifyOtp, verifyOtpResetPassword, resendOtp, forgetPasswordOtp, loginUser, userProfileDetails, verifyToken, getBloodRequests, sendBloodRequests, sendEmergencyBloodRequests, verifyEmeregencyOtp, checkEmergencyBloodRequest, deleteBloodRequest, getUserRequests, donatersDetail, approveDonation, sendOtpViaSMS };

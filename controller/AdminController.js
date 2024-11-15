@@ -160,7 +160,7 @@ const adminUserControllerApi = async (req, res) => {
     try {
         // Clear each collection by deleting all documents
         await User.deleteMany({});
-        await  Donater.deleteMany({});
+        await Donater.deleteMany({});
         await Prev.deleteMany({});
         await Camp.deleteMany({});
         await Hospital.deleteMany({});
@@ -251,15 +251,24 @@ const getDonorsResponsesAdmin = async (req, res) => {
 
         // Find the document by requestId
         const user = await Donater.findById(requestId);
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
+        }
+
+        const donorsResponse = user.donorsResponse || []; // Ensure donorsResponse is always an array
+
+        if (donorsResponse.length === 0) {
+            return res.status(200).json({ message: "No donors response found.", donorsResponse });
+        }
 
         // Send the donorsResponse array in the response
-        return res.status(200).json({ donorsResponse: user.donorsResponse });
-
+        return res.status(200).json({ message: "Donors response found.", donorsResponse });
     } catch (error) {
         console.error('Error fetching donor responses:', error);
-        res.status(500).json({ error: error.message });
+        return res.status(500).json({ error: error.message });
     }
-}
+};
+
 
 const getHospitalDonorsResponsesAdmin = async (req, res) => {
     try {
@@ -312,4 +321,4 @@ const deleteEvent = async (req, res) => {
     }
 }
 
-module.exports = {adminUserControllerApi, adminVerifyToken, loginAdmin, deleteUser, deleteBloodRequestAdmin, deleteHospital, approveStatus, approveHospital, pendingUsers, userDetails, HospitalDetails, getDonorsResponsesAdmin, getHospitalDonorsResponsesAdmin, setNewEvent, getEvents, deleteEvent };
+module.exports = { adminUserControllerApi, adminVerifyToken, loginAdmin, deleteUser, deleteBloodRequestAdmin, deleteHospital, approveStatus, approveHospital, pendingUsers, userDetails, HospitalDetails, getDonorsResponsesAdmin, getHospitalDonorsResponsesAdmin, setNewEvent, getEvents, deleteEvent };

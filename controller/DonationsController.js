@@ -219,9 +219,10 @@ const donationsControllerApi = async (req, res) => {
 
 const getAllDonations = async (req, res) => {
   try {
-    const allBloodRequests = await Prev.find();
+    const allBloodRequests = await Donater.find();
     const getAllEmergencyRequests = await Emeregency.find();
-    res.status(200).json({allBloodRequests , getAllEmergencyRequests})
+    const previousRequests = await Prev.find();
+    res.status(200).json({ allBloodRequests, getAllEmergencyRequests, previousRequests })
   } catch (error) {
     res.status(500).json({ message: 'Server error ', error });
   }
