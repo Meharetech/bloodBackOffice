@@ -30,6 +30,8 @@ const {
 const { deleteImage, generateSignature, updateImage, getImages, adminControllerApi } = require('./controller/AdminImageController');
 const { registerVehicle, getVehicleByPincode, getAllVehicles, updateVehicleDetails, deleteVehicle } = require('./controller/VehicleController');
 
+const { addOrUpdateHospitalBank, getBloodBankDetails, getALLBloodBankDetails } = require('./controller/BloodBankController');
+
 const limiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutes
     max: 3, // Limit each IP to 100 requests per windowMs
@@ -282,6 +284,20 @@ app.get('/hospitlDonationDetail',
 app.get('/hospitalProfileDetails',
     HospitalverifyToken,
     hospitalProfileDetails
+)
+
+app.post('/updateBloodBank',
+    HospitalverifyToken,
+    addOrUpdateHospitalBank
+)
+
+app.get('/getBloodBankDetails',
+    HospitalverifyToken,
+    getBloodBankDetails
+)
+
+app.get('/getAllBloodBankDetails',
+    getALLBloodBankDetails
 )
 
 app.put('/updateHospitalProfileDetails', HospitalverifyToken, updateHospitalProfileDetails)
