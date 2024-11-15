@@ -1,6 +1,7 @@
 // controllers/volunteerVehicleController.js
 
 const VolunteerVehicle = require("../model/VehicleSchema");
+const { sendOtpViaSMS } = require("./UserController");
 
 
 // Register a new volunteer vehicle
@@ -18,6 +19,9 @@ const registerVehicle = async (req, res) => {
             availableDays,
         } = req.body;
 
+        // Generate a 6-digit OTP
+        const otp = Math.floor(100000 + Math.random() * 900000).toString();
+
         // Calculate expiration date based on availableDays
         const expirationDate = new Date();
         expirationDate.setDate(expirationDate.getDate() + parseInt(availableDays));
@@ -34,20 +38,50 @@ const registerVehicle = async (req, res) => {
             dateOfAvailability,
             availableDays,
             expirationDate,
+            otp,
         });
 
         // Save to the database
         await newVehicle.save();
 
+        // Send OTP via SMS
+        await sendOtpViaSMS(contactNumber, otp, ownerName);
+
         return res.status(201).json({
-            message: 'Vehicle registered successfully',
-            vehicle: newVehicle,
+            message: 'Vehicle registered successfully. Verify OTP within 10 minutes.',
+            vehicleId: newVehicle._id,
         });
     } catch (error) {
         console.error('Error registering vehicle:', error);
         return res.status(500).json({ error: 'Failed to register vehicle' });
     }
 };
+
+const verifyVehicleOtp = async (req, res) => {
+    try {
+        const { contactNumber, otp } = req.body;
+
+        // Find the vehicle record by ID and OTP
+        const vehicle = await VolunteerVehicle.findOne({contactNumber, otp });
+
+        if (!vehicle) {
+            return res.status(400).json({ error: 'Invalid OTP or vehicle not found' });
+        }
+
+        // Verify OTP and mark the vehicle as verified
+        vehicle.isVerified = true;
+        vehicle.verificationTimestamp = new Date(); // Record the verification time
+
+        // Save the changes
+        await vehicle.save();
+
+        return res.status(200).json({ message: 'OTP verified successfully' });
+    } catch (error) {
+        console.error('Error verifying OTP:', error);
+        return res.status(500).json({ error: 'Failed to verify OTP' });
+    }
+};
+
 
 const getAllVehicles = async (req, res) => {
     try {
@@ -146,4 +180,4 @@ const deleteVehicle = async (req, res) => {
     }
 };
 
-module.exports = { registerVehicle, getAllVehicles, getVehicleByPincode,updateVehicleDetails,deleteVehicle }
+module.exports = { registerVehicle, getAllVehicles, verifyVehicleOtp, getVehicleByPincode, updateVehicleDetails, deleteVehicle }

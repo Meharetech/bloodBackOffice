@@ -28,7 +28,7 @@ const {
     updateHospitalProfileDetails
 } = require('./controller/HospitalController');
 const { deleteImage, generateSignature, updateImage, getImages, adminControllerApi } = require('./controller/AdminImageController');
-const { registerVehicle, getVehicleByPincode, getAllVehicles, updateVehicleDetails, deleteVehicle } = require('./controller/VehicleController');
+const { registerVehicle, getVehicleByPincode, getAllVehicles, updateVehicleDetails, deleteVehicle, verifyVehicleOtp } = require('./controller/VehicleController');
 
 const { addOrUpdateHospitalBank, getBloodBankDetails, getALLBloodBankDetails } = require('./controller/BloodBankController');
 
@@ -325,6 +325,7 @@ app.get('/getImages',
 )
 
 app.post('/registerVehicle', registerVehicle);
+app.post('/verifyVehicleOtp',verifyVehicleOtp)
 app.get('/getAllVehicles', getAllVehicles);
 app.get('/getVehiclesByPincode', getVehicleByPincode);
 app.put('/updateVehicleDetails', adminVerifyToken, updateVehicleDetails);

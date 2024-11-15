@@ -1,4 +1,3 @@
-// models/VolunteerVehicle.js
 
 const mongoose = require('mongoose');
 
@@ -21,7 +20,7 @@ const volunteerVehicleSchema = new mongoose.Schema({
     pincode: {
         type: String,
         required: true,
-        trim: true
+        trim: true,
     },
     capacity: {
         type: Number,
@@ -51,9 +50,28 @@ const volunteerVehicleSchema = new mongoose.Schema({
         type: Date,
         required: true,
     },
+    otp: {
+        type: String, // Store the OTP for verification
+        required: true,
+    },
+    isVerified: {
+        type: Boolean,
+        default: false, // Set to true after OTP verification
+    },
+    verificationTimestamp: {
+        type: Date, // Timestamp for when OTP was verified
+        default: null,
+    },
+    createdAt: {
+        type: Date,
+        default: Date.now,
+    },
 }, {
     timestamps: true,
 });
+
+// TTL index for automatic deletion (after 10 minutes if unverified)
+volunteerVehicleSchema.index({ createdAt: 1 }, { expireAfterSeconds: 600 });
 
 const VolunteerVehicle = mongoose.model('VolunteerVehicle', volunteerVehicleSchema);
 
