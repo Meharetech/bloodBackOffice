@@ -326,7 +326,7 @@ const verifyEmeregencyOtp = async (req, res) => {
         await emergencyRequest.save();
         let googleMapsLink = ``;
         if (emergencyRequest.location) {
-            googleMapsLink = `https://www.google.com/maps?q=${emergencyRequest.location.latitude},${emergencyRequest.location.longitude}`;
+            googleMapsLink = `https://www.google.com/maps?q=${emergencyRequest.location.latitude},${emergencyRequest.location.longitude} , Number : ${emergencyRequest.phoneNumber}`;
         } else {
             googleMapsLink = `Location Not Provided By the User .`;
         }
