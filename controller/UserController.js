@@ -16,6 +16,7 @@ const Image = require('../model/ImageAdminSchema');
 const UserImage = require('../model/UserImagesSchema');
 const { default: axios } = require('axios');
 const Emeregency = require('../model/EmeregencyRequestSchema');
+const { response } = require('express');
 
 const jwtSecret = 'Thr0bZyphrnQ8vkJumpl3BaskEel@ticsXzylN!gmaPneuma';
 
@@ -52,6 +53,30 @@ const sendOtpViaSMS = async (mobile, otp, userName) => {
         throw new Error("Failed to send WhatsApp OTP"); // Throw error for error handling in `sendOtp`
     }
 }
+
+const sendBloodRequestWAMessage = async (mobile, bloodGroup, mapLink) => {
+    try {
+        const response = await axios.post('https://backend.aisensy.com/campaign/t1/api/v2', {
+            apiKey: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2OGUyMGFmMmM2MjQ5MThjZWY4MWI0NiIsIm5hbWUiOiJpaW5zYWYtbmV3IiwiYXBwTmFtZSI6IkFpU2Vuc3kiLCJjbGllbnRJZCI6IjY2OGI4MjY4NTk4MWY4MTkzNjkwZDE4OCIsImFjdGl2ZVBsYW4iOiJCQVNJQ19NT05USExZIiwiaWF0IjoxNzIxODEzMTA2fQ.ZhQAF2tICnEtxVfiJS_y8dIdbLtIezK4R7Jd1Z1trw4",
+            campaignName: "blood_request",
+            destination: mobile, // Dynamic mobile parameter
+            userName: "iinsaf-new",
+            templateParams: [
+                bloodGroup, // Use bloodGroup dynamically
+                mapLink // Use mapLink dynamically
+            ],
+            source: "new-landing-page form",
+            paramsFallbackValue: {
+                FirstName: "user"
+            }
+        });
+        return response.data; // Return the response data for further processing
+    } catch (error) { // Capture error in the catch block
+        console.error("Error sending WhatsApp message:", error);
+        throw new Error("Failed to send WhatsApp message"); // Provide specific error context
+    }
+};
+
 
 const getCompatibleBloodGroups = (bloodGroup) => {
     switch (bloodGroup) {
@@ -171,6 +196,26 @@ const sendBloodRequests = async (req, res) => {
                 name,
             })
 
+            let googleMapsLink = ``;
+            if (newUser.location) {
+                googleMapsLink = `https://www.google.com/maps?q=${newUser.location.latitude},${newUser.location.longitude}`;
+            } else {
+                googleMapsLink = `Location Not Provided By the User .`;
+            }
+
+            if (newUser) {
+                const users = await User.find(); // Assuming `User.find()` retrieves all users
+
+                // Loop through each user and send a message
+                for (const user of users) {
+                    try {
+                        await sendBloodRequestWAMessage(user.phoneNumber, newUser.bloodGroup, googleMapsLink);
+                        console.log(`Message sent to ${user.phoneNumber}`);
+                    } catch (error) {
+                        console.error(`Failed to send message to ${user.phoneNumber}:`, error);
+                    }
+                }
+            }
             res.status(200).json(newUser);
         }
     } catch (error) {
@@ -279,6 +324,25 @@ const verifyEmeregencyOtp = async (req, res) => {
         emergencyRequest.otpExpiry = null;
 
         await emergencyRequest.save();
+        let googleMapsLink = ``;
+        if (emergencyRequest.location) {
+            googleMapsLink = `https://www.google.com/maps?q=${emergencyRequest.location.latitude},${emergencyRequest.location.longitude}`;
+        } else {
+            googleMapsLink = `Location Not Provided By the User .`;
+        }
+        if (emergencyRequest.status === 'approved') {
+            const users = await User.find(); // Assuming `User.find()` retrieves all users
+
+            // Loop through each user and send a message
+            for (const user of users) {
+                try {
+                    await sendBloodRequestWAMessage(user.phoneNumber, emergencyRequest.bloodGroup, googleMapsLink);
+                    console.log(`Message sent to ${user.phoneNumber}`);
+                } catch (error) {
+                    console.error(`Failed to send message to ${user.phoneNumber}:`, error);
+                }
+            }
+        }
 
         res.status(200).json({ message: "OTP verified successfully, request approved.", data: emergencyRequest });
     } catch (error) {
@@ -719,4 +783,4 @@ const userProfileDetails = async (req, res) => {
 
 
 
-module.exports = { userControllerApi, addUser, verifyOtp, verifyOtpResetPassword, resendOtp, forgetPasswordOtp, loginUser, userProfileDetails, verifyToken, getBloodRequests, sendBloodRequests, sendEmergencyBloodRequests, verifyEmeregencyOtp, checkEmergencyBloodRequest, deleteBloodRequest, getUserRequests, donatersDetail, approveDonation, sendOtpViaSMS };
+module.exports = { sendBloodRequestWAMessage, userControllerApi, addUser, verifyOtp, verifyOtpResetPassword, resendOtp, forgetPasswordOtp, loginUser, userProfileDetails, verifyToken, getBloodRequests, sendBloodRequests, sendEmergencyBloodRequests, verifyEmeregencyOtp, checkEmergencyBloodRequest, deleteBloodRequest, getUserRequests, donatersDetail, approveDonation, sendOtpViaSMS };
