@@ -198,7 +198,7 @@ const sendBloodRequests = async (req, res) => {
 
             let googleMapsLink = ``;
             if (newUser.location) {
-                googleMapsLink = `https://www.google.com/maps?q=${newUser.location.latitude},${newUser.location.longitude}`;
+                googleMapsLink = `https://www.google.com/maps?q=${newUser.location.latitude},${newUser.location.longitude} , Number : ${newUser.phoneNumber} `;
             } else {
                 googleMapsLink = `Location Not Provided By the User .`;
             }
