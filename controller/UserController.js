@@ -21,60 +21,62 @@ const { response } = require('express');
 const jwtSecret = 'Thr0bZyphrnQ8vkJumpl3BaskEel@ticsXzylN!gmaPneuma';
 
 const sendOtpViaSMS = async (mobile, otp, userName) => {
-    try {
-        console.log("user in otv via sms => ", mobile, otp, userName);
-        const response = await axios.post('https://backend.aisensy.com/campaign/t1/api/v2', {
-            "apiKey": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2OGUyMGFmMmM2MjQ5MThjZWY4MWI0NiIsIm5hbWUiOiJpaW5zYWYtbmV3IiwiYXBwTmFtZSI6IkFpU2Vuc3kiLCJjbGllbnRJZCI6IjY2OGI4MjY4NTk4MWY4MTkzNjkwZDE4OCIsImFjdGl2ZVBsYW4iOiJCQVNJQ19NT05USExZIiwiaWF0IjoxNzIxODEzMTA2fQ.ZhQAF2tICnEtxVfiJS_y8dIdbLtIezK4R7Jd1Z1trw4",
-            "campaignName": "copy_otp",
-            "destination": `91${mobile}`,
-            // "userName": "iinsaf-new",
-            "templateParams": [
-                `${otp}`
-            ],
+    // try {
+    //     console.log("user in otv via sms => ", mobile, otp, userName);
+    //     const response = await axios.post('https://backend.aisensy.com/campaign/t1/api/v2', {
+    //         "apiKey": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2OGUyMGFmMmM2MjQ5MThjZWY4MWI0NiIsIm5hbWUiOiJpaW5zYWYtbmV3IiwiYXBwTmFtZSI6IkFpU2Vuc3kiLCJjbGllbnRJZCI6IjY2OGI4MjY4NTk4MWY4MTkzNjkwZDE4OCIsImFjdGl2ZVBsYW4iOiJCQVNJQ19NT05USExZIiwiaWF0IjoxNzIxODEzMTA2fQ.ZhQAF2tICnEtxVfiJS_y8dIdbLtIezK4R7Jd1Z1trw4",
+    //         "campaignName": "copy_otp",
+    //         "destination": `91${mobile}`,
+    //         // "userName": "iinsaf-new",
+    //         "templateParams": [
+    //             `${otp}`
+    //         ],
 
-            "buttons": [
-                {
-                    "type": "button",
-                    "sub_type": "url",
-                    "index": 0,
-                    "parameters": [
-                        {
-                            "type": "text",
-                            "text": `${otp}`
-                        }
-                    ]
-                }
-            ],
-        })
-        console.log("WhatsApp OTP sent : ", response.data);
-        return response.data; // Return response if needed for further handling
-    } catch (error) {
-        console.error("Error sending WhatsApp OTP:", error);
-        throw new Error("Failed to send WhatsApp OTP"); // Throw error for error handling in `sendOtp`
-    }
+    //         "buttons": [
+    //             {
+    //                 "type": "button",
+    //                 "sub_type": "url",
+    //                 "index": 0,
+    //                 "parameters": [
+    //                     {
+    //                         "type": "text",
+    //                         "text": `${otp}`
+    //                     }
+    //                 ]
+    //             }
+    //         ],
+    //     })
+    //     console.log("WhatsApp OTP sent : ", response.data);
+    //     return response.data; // Return response if needed for further handling
+    // } catch (error) {
+    //     console.error("Error sending WhatsApp OTP:", error);
+    //     throw new Error("Failed to send WhatsApp OTP"); // Throw error for error handling in `sendOtp`
+    // }
+    console.log("WhatsApp Api not available .")
 }
 
 const sendBloodRequestWAMessage = async (mobile, bloodGroup, mapLink) => {
-    try {
-        const response = await axios.post('https://backend.aisensy.com/campaign/t1/api/v2', {
-            apiKey: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2OGUyMGFmMmM2MjQ5MThjZWY4MWI0NiIsIm5hbWUiOiJpaW5zYWYtbmV3IiwiYXBwTmFtZSI6IkFpU2Vuc3kiLCJjbGllbnRJZCI6IjY2OGI4MjY4NTk4MWY4MTkzNjkwZDE4OCIsImFjdGl2ZVBsYW4iOiJCQVNJQ19NT05USExZIiwiaWF0IjoxNzIxODEzMTA2fQ.ZhQAF2tICnEtxVfiJS_y8dIdbLtIezK4R7Jd1Z1trw4",
-            campaignName: "blood_request",
-            destination: mobile, // Dynamic mobile parameter
-            userName: "iinsaf-new",
-            templateParams: [
-                bloodGroup, // Use bloodGroup dynamically
-                mapLink // Use mapLink dynamically
-            ],
-            source: "new-landing-page form",
-            paramsFallbackValue: {
-                FirstName: "user"
-            }
-        });
-        return response.data; // Return the response data for further processing
-    } catch (error) { // Capture error in the catch block
-        console.error("Error sending WhatsApp message:", error);
-        throw new Error("Failed to send WhatsApp message"); // Provide specific error context
-    }
+    // try {
+    //     const response = await axios.post('https://backend.aisensy.com/campaign/t1/api/v2', {
+    //         apiKey: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2OGUyMGFmMmM2MjQ5MThjZWY4MWI0NiIsIm5hbWUiOiJpaW5zYWYtbmV3IiwiYXBwTmFtZSI6IkFpU2Vuc3kiLCJjbGllbnRJZCI6IjY2OGI4MjY4NTk4MWY4MTkzNjkwZDE4OCIsImFjdGl2ZVBsYW4iOiJCQVNJQ19NT05USExZIiwiaWF0IjoxNzIxODEzMTA2fQ.ZhQAF2tICnEtxVfiJS_y8dIdbLtIezK4R7Jd1Z1trw4",
+    //         campaignName: "blood_request1",
+    //         destination: mobile, // Dynamic mobile parameter
+    //         userName: "iinsaf-new",
+    //         templateParams: [
+    //             bloodGroup, // Use bloodGroup dynamically
+    //             mapLink // Use mapLink dynamically
+    //         ],
+    //         source: "new-landing-page form",
+    //         paramsFallbackValue: {
+    //             FirstName: "user"
+    //         }
+    //     });
+    //     return response.data; // Return the response data for further processing
+    // } catch (error) { // Capture error in the catch block
+    //     console.error("Error sending WhatsApp message:", error);
+    //     throw new Error("Failed to send WhatsApp message"); // Provide specific error context
+    // }
+    console.log("WhatsApp Api not available .")
 };
 
 
